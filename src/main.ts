@@ -30,8 +30,8 @@ app.innerHTML = `
     <div class="presets">
       <span class="label">Range</span>
       <button type="button" class="chip" data-period="P1D">1 day</button>
-      <button type="button" class="chip" data-period="P7D">7 days</button>
-      <button type="button" class="chip chip-active" data-period="P30D">30 days</button>
+      <button type="button" class="chip chip-active" data-period="P7D">7 days</button>
+      <button type="button" class="chip" data-period="P30D">30 days</button>
     </div>
     <div class="custom-range">
       <span class="label">Custom</span>
@@ -77,7 +77,7 @@ app.innerHTML = `
   </footer>
 `;
 
-let currentReq: IvRequest = { kind: "preset", period: "P30D" };
+let currentReq: IvRequest = { kind: "preset", period: "P7D" };
 let chartQ: Chart<"line"> | null = null;
 let chartT: Chart<"line"> | null = null;
 
@@ -243,11 +243,11 @@ document.getElementById("applyCustom")?.addEventListener("click", () => {
 const today = new Date();
 const pad = (n: number) => String(n).padStart(2, "0");
 el.endDate.value = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
-const monthAgo = new Date(today);
-monthAgo.setDate(monthAgo.getDate() - 30);
-el.startDate.value = `${monthAgo.getFullYear()}-${pad(monthAgo.getMonth() + 1)}-${pad(monthAgo.getDate())}`;
+const weekAgo = new Date(today);
+weekAgo.setDate(weekAgo.getDate() - 7);
+el.startDate.value = `${weekAgo.getFullYear()}-${pad(weekAgo.getMonth() + 1)}-${pad(weekAgo.getDate())}`;
 
-updatePresetUi("P30D");
+updatePresetUi("P7D");
 void load();
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {

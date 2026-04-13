@@ -29,6 +29,10 @@ npm run preview
 
 Deploy the contents of `dist/` to any HTTPS static host.
 
+### Vercel
+
+This repo includes [`vercel.json`](vercel.json) so the deployment serves the Vite build from **`dist/`** and applies an SPA rewrite to `index.html` per [Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite). If the dashboard **Output Directory** or **Build Command** was overridden, clear those overrides or set them to **`dist`** and **`npm run build`**, then redeploy.
+
 ### GitHub Pages (project site)
 
 If your site URL includes the repository name (for example `https://<user>.github.io/St.-Croix-River-Data/`), build with the matching base path:
