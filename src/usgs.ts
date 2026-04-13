@@ -22,9 +22,10 @@ export type IvRequest =
   | { kind: "preset"; period: PresetPeriod }
   | { kind: "range"; start: Date; end: Date };
 
+/** Paths like `/iv/?q=…` or `/stat/?q=…` (after `/nwis`). Dev proxy maps `/usgs-nwis` → `/nwis` upstream. */
 function nwisPath(path: string): string {
   if (import.meta.env.DEV) return `/usgs-nwis${path}`;
-  return `https://waterservices.usgs.gov${path}`;
+  return `https://waterservices.usgs.gov/nwis${path}`;
 }
 
 export function celsiusToFahrenheit(c: number): number {
