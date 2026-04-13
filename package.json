@@ -2,6 +2,10 @@
   "name": "riverdata",
   "private": true,
   "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/downeasternman/St.-Croix-River-Data.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
