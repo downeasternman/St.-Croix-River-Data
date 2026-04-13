@@ -4,7 +4,7 @@ A small Progressive Web App that charts **U.S. Geological Survey (USGS)** stream
 
 | Series         | Site ID   | Measure                         |
 |----------------|-----------|----------------------------------|
-| Discharge      | `01021000`| cubic feet per second (ft³/s)    |
+| Flow           | `01021000`| ft³/s (chart also shows US gal/s)|
 | Water temp.    | `01021050`| degrees Fahrenheit (from °C IV) |
 
 You can pick **1 day**, **7 days**, **30 days**, or a **custom start/end date** (within USGS instantaneous limits). Each chart can show a **long-term daily mean** line for the same calendar date, from the USGS [Statistics Service](https://waterservices.usgs.gov/docs/statistics/statistics-details/) (tab-delimited RDB output; statistics are based on approved daily-mean records where available).

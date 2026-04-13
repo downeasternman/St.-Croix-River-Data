@@ -1,7 +1,7 @@
 {
   "name": "St. Croix River Data",
   "short_name": "St. Croix",
-  "description": "USGS discharge and water temperature for the St. Croix River",
+  "description": "USGS river flow and water temperature for the St. Croix River",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f4f7fb",

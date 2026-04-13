@@ -14,7 +14,12 @@ import {
   type IvRequest,
   type PresetPeriod,
 } from "./usgs";
-import { decimateIvPoints, renderDischargeChart, renderTemperatureChart } from "./charts";
+import {
+  decimateIvPoints,
+  renderFlowChart,
+  renderTemperatureChart,
+  GAL_PER_CUBIC_FOOT,
+} from "./charts";
 import type { Chart } from "chart.js";
 
 const app = document.querySelector<HTMLDivElement>("#app");
@@ -23,7 +28,7 @@ if (!app) throw new Error("#app missing");
 app.innerHTML = `
   <header class="app-header">
     <h1>St. Croix River</h1>
-    <p class="tagline">USGS discharge & water temperature</p>
+    <p class="tagline">USGS river flow & water temperature</p>
   </header>
 
   <section class="controls" aria-label="Time range">
@@ -47,7 +52,7 @@ app.innerHTML = `
   <main class="cards">
     <article class="card" id="cardQ">
       <header>
-        <h2>Discharge</h2>
+        <h2>Flow</h2>
         <p class="meta" id="metaQ"></p>
       </header>
       <div class="chart-wrap">
@@ -170,7 +175,7 @@ async function load() {
 
     if (histQ.length === 0 && statQ.size === 0) {
       el.histNoteQ.textContent =
-        "Historical average line not shown (no statistics returned for discharge at this site).";
+        "Historical average line not shown (no statistics returned for flow at this site).";
       el.histNoteQ.hidden = false;
     } else if (histQ.length === 0) {
       el.histNoteQ.textContent =
@@ -189,12 +194,12 @@ async function load() {
     }
 
     if (ptsQ.length === 0) {
-      el.footQ.textContent = "No discharge data in this window (maintenance or outages).";
+      el.footQ.textContent = "No flow data in this window (maintenance or outages).";
     } else {
       const last = parsedQ.lastQualifierCodes?.length
         ? ` · Codes: ${parsedQ.lastQualifierCodes.join(", ")}`
         : "";
-      el.footQ.textContent = `Points: ${parsedQ.points.length}${last}`;
+      el.footQ.textContent = `Points: ${parsedQ.points.length} · 1 ft³/s = ${GAL_PER_CUBIC_FOOT.toFixed(3)} US gal/s${last}`;
     }
 
     if (ptsT.length === 0) {
@@ -206,7 +211,7 @@ async function load() {
       el.footT.textContent = `Sensor reports °C; chart is °F.${last}`;
     }
 
-    chartQ = renderDischargeChart(el.chartQ, ptsQ, histQ);
+    chartQ = renderFlowChart(el.chartQ, ptsQ, histQ);
     chartT = renderTemperatureChart(el.chartT, ptsT, histT);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Request failed";
