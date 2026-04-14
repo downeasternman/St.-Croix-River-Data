@@ -45,6 +45,10 @@ app.innerHTML = `
       <input type="date" id="endDate" aria-label="End date" />
       <button type="button" class="btn-apply" id="applyCustom">Apply</button>
     </div>
+    <div class="refresh-row">
+      <button type="button" class="btn-refresh" id="refreshBtn">Refresh now</button>
+      <span class="refresh-info" id="refreshInfo"></span>
+    </div>
     <p class="range-summary" id="rangeSummary"></p>
     <p class="form-error" id="formError" role="alert" hidden></p>
   </section>
@@ -85,6 +89,9 @@ app.innerHTML = `
 let currentReq: IvRequest = { kind: "preset", period: "P7D" };
 let chartQ: Chart<"line"> | null = null;
 let chartT: Chart<"line"> | null = null;
+let minRefreshMinutes = 15;
+let nextAllowedRefreshAt = 0;
+let refreshTicker: number | null = null;
 
 const el = {
   rangeSummary: document.getElementById("rangeSummary")!,
@@ -101,6 +108,8 @@ const el = {
   histNoteT: document.getElementById("histNoteT")!,
   startDate: document.getElementById("startDate") as HTMLInputElement,
   endDate: document.getElementById("endDate") as HTMLInputElement,
+  refreshBtn: document.getElementById("refreshBtn") as HTMLButtonElement,
+  refreshInfo: document.getElementById("refreshInfo")!,
 };
 
 function setBusy(busy: boolean) {
@@ -108,6 +117,8 @@ function setBusy(busy: boolean) {
   el.loadT.hidden = !busy;
   el.chartQ.style.opacity = busy ? "0.25" : "1";
   el.chartT.style.opacity = busy ? "0.25" : "1";
+  if (busy) el.refreshBtn.disabled = true;
+  else updateRefreshUi();
 }
 
 function destroyCharts() {
@@ -137,6 +148,61 @@ function summarizeRange() {
     const b = currentReq.end.toLocaleDateString();
     el.rangeSummary.textContent = `${a} — ${b}`;
   }
+}
+
+function formatTimestamp(d: Date): string {
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function medianIntervalMinutes(points: Array<{ t: Date }>): number | null {
+  if (points.length < 3) return null;
+  const deltas: number[] = [];
+  for (let i = 1; i < points.length; i++) {
+    const ms = points[i].t.getTime() - points[i - 1].t.getTime();
+    if (ms > 0) deltas.push(ms / 60000);
+  }
+  if (deltas.length === 0) return null;
+  deltas.sort((a, b) => a - b);
+  const mid = Math.floor(deltas.length / 2);
+  return deltas.length % 2 === 0 ? (deltas[mid - 1] + deltas[mid]) / 2 : deltas[mid];
+}
+
+function inferMinRefreshMinutes(
+  flowPts: Array<{ t: Date }>,
+  tempPts: Array<{ t: Date }>
+): number {
+  // USGS continuous/instantaneous updates are commonly around 15 minutes.
+  const candidates = [15];
+  const flowMed = medianIntervalMinutes(flowPts);
+  const tempMed = medianIntervalMinutes(tempPts);
+  if (flowMed) candidates.push(flowMed);
+  if (tempMed) candidates.push(tempMed);
+  const inferred = Math.max(...candidates);
+  return Math.max(5, Math.round(inferred));
+}
+
+function updateRefreshUi(nowMs = Date.now()): void {
+  const waitMs = Math.max(0, nextAllowedRefreshAt - nowMs);
+  const waitMin = Math.ceil(waitMs / 60000);
+  const canRefresh = waitMs <= 0;
+  el.refreshBtn.disabled = !canRefresh;
+  if (canRefresh) {
+    el.refreshInfo.textContent = `Ready. Minimum interval: ${minRefreshMinutes} min (USGS stations typically update about every 15 min).`;
+    return;
+  }
+  el.refreshInfo.textContent = `To be gentle on USGS servers, refresh is limited to about every ${minRefreshMinutes} min. Try again in ${waitMin} min.`;
+}
+
+function setRefreshCooldown(): void {
+  nextAllowedRefreshAt = Date.now() + minRefreshMinutes * 60_000;
+  updateRefreshUi();
+  if (refreshTicker) window.clearInterval(refreshTicker);
+  refreshTicker = window.setInterval(() => updateRefreshUi(), 30_000);
 }
 
 async function load() {
@@ -172,6 +238,8 @@ async function load() {
 
     const histQ = buildHistOverlay(ptsQ, statQ, (v) => v);
     const histT = buildHistOverlay(ptsT, statT, (c) => celsiusToFahrenheit(c));
+    minRefreshMinutes = inferMinRefreshMinutes(parsedQ.points, parsedT.points);
+    setRefreshCooldown();
 
     if (histQ.length === 0 && statQ.size === 0) {
       el.histNoteQ.textContent =
@@ -199,7 +267,9 @@ async function load() {
       const last = parsedQ.lastQualifierCodes?.length
         ? ` · Codes: ${parsedQ.lastQualifierCodes.join(", ")}`
         : "";
-      el.footQ.textContent = `Points: ${parsedQ.points.length} · 1 ft³/s = ${GAL_PER_CUBIC_FOOT.toFixed(3)} US gal/s${last}`;
+      const latest = ptsQ[ptsQ.length - 1]?.t;
+      const tsText = latest ? ` · Collected: ${formatTimestamp(latest)}` : "";
+      el.footQ.textContent = `Points: ${parsedQ.points.length} · 1 ft³/s = ${GAL_PER_CUBIC_FOOT.toFixed(3)} US gal/s${tsText}${last}`;
     }
 
     if (ptsT.length === 0) {
@@ -208,7 +278,9 @@ async function load() {
       const last = parsedT.lastQualifierCodes?.length
         ? ` · Codes: ${parsedT.lastQualifierCodes.join(", ")}`
         : "";
-      el.footT.textContent = `Sensor reports °C; chart is °F.${last}`;
+      const latest = ptsT[ptsT.length - 1]?.t;
+      const tsText = latest ? ` · Collected: ${formatTimestamp(latest)}` : "";
+      el.footT.textContent = `Sensor reports °C; chart is °F.${tsText}${last}`;
     }
 
     chartQ = renderFlowChart(el.chartQ, ptsQ, histQ);
@@ -245,6 +317,14 @@ document.getElementById("applyCustom")?.addEventListener("click", () => {
   void load();
 });
 
+el.refreshBtn.addEventListener("click", () => {
+  if (Date.now() < nextAllowedRefreshAt) {
+    updateRefreshUi();
+    return;
+  }
+  void load();
+});
+
 const today = new Date();
 const pad = (n: number) => String(n).padStart(2, "0");
 el.endDate.value = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
@@ -253,6 +333,7 @@ weekAgo.setDate(weekAgo.getDate() - 7);
 el.startDate.value = `${weekAgo.getFullYear()}-${pad(weekAgo.getMonth() + 1)}-${pad(weekAgo.getDate())}`;
 
 updatePresetUi("P7D");
+updateRefreshUi();
 void load();
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {

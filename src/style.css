@@ -156,6 +156,34 @@ body {
   color: #1e293b;
 }
 
+.refresh-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.btn-refresh {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: #fff;
+  color: #1e293b;
+}
+
+.btn-refresh:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.refresh-info {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 .form-error {
   margin: 0.5rem 0 0;
   color: #b91c1c;
