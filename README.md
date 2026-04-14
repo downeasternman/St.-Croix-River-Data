@@ -1,64 +1,90 @@
-# St. Croix River Data
+# St. Croix River Flow & Temperature
 
-A small Progressive Web App that charts **U.S. Geological Survey (USGS)** streamflow and water temperature for the St. Croix River in Maine:
+Fast, simple river data for the St. Croix River.
 
-| Series         | Site ID   | Measure                         |
-|----------------|-----------|----------------------------------|
-| Flow           | `01021000`| ft³/s (chart also shows US gal/s)|
-| Water temp.    | `01021050`| degrees Fahrenheit (from °C IV) |
+👉 Open it here:  
+https://st-croix-river-data.vercel.app/
 
-You can pick **1 day**, **7 days**, **30 days**, or a **custom start/end date** (within USGS instantaneous limits). Each chart can show a **long-term daily mean** line for the same calendar date, from the USGS [Statistics Service](https://waterservices.usgs.gov/docs/statistics/statistics-details/) (tab-delimited RDB output; statistics are based on approved daily-mean records where available).
+No accounts. No clutter. Just the numbers that matter.
 
-The temperature trace is **tinted for swim comfort relative to 70°F** (cooler water reads bluer).
+## What you get
 
-## Run locally
+- Current river flow (discharge)
+- Current water temperature
+- Easy-to-read trends over time
+- Works right on your phone
 
-```bash
-npm install
-npm run dev
-```
+## Install on your phone (30 seconds)
 
-Open the URL shown in the terminal (Vite proxies USGS requests in development to avoid CORS issues).
+You don’t need the app store. This installs straight from your browser.
 
-## Production build
+### iPhone (Safari)
 
-```bash
-npm run build
-npm run preview
-```
+1. Open the site in Safari
+2. Tap the Share button (square with arrow)
+3. Scroll down and tap “Add to Home Screen”
+4. Tap Add
 
-Deploy the contents of `dist/` to any HTTPS static host.
+You’ll now have it like a normal app on your home screen.
 
-### Vercel
+### Android (Chrome)
 
-This repo includes [`vercel.json`](vercel.json) so the deployment serves the Vite build from **`dist/`** and applies an SPA rewrite to `index.html` per [Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite). If the dashboard **Output Directory** or **Build Command** was overridden, clear those overrides or set them to **`dist`** and **`npm run build`**, then redeploy.
+1. Open the site in Chrome
+2. Tap the 3-dot menu (top right)
+3. Tap “Add to Home Screen” or “Install App”
+4. Confirm
 
-### GitHub Pages (project site)
+Done. It behaves like a native app.
 
-If your site URL includes the repository name (for example `https://<user>.github.io/St.-Croix-River-Data/`), build with the matching base path:
+## Why people use this
 
-```bash
-npm run build -- --base /St.-Croix-River-Data/
-```
+- Check if the river is safe or runnable
+- Know what fish are likely doing
+- Track changing conditions without digging through USGS pages
 
-Then publish the `dist/` output (for example with the `peaceiris/actions-gh-pages` action or by pushing to a `gh-pages` branch).
+## Where the data comes from
 
-## Phone shortcut (Android)
+Direct from the U.S. Geological Survey (USGS) in near real-time.
 
-After deploying over HTTPS, open the site in Chrome, use the menu, and choose **Add to Home screen** or **Install app**.
+No manual updates. No guessing.
 
-## Commit message policy
+## Support the project
 
-This repository uses a local `.git/hooks/commit-msg` hook that rejects commit messages containing `Cursor`/`Made-with: Cursor`.
+This is donationware.
 
-If a commit is blocked:
+If you use it and want to keep it alive and expanding, consider contributing.  
+(Details coming soon)
 
-1. Edit the commit message to remove the banned trailer/content.
-2. Re-run the commit.
+## ⚡ Want this for your river?
 
-## Data sources
+This is the important part.
 
-- Instantaneous values: [NWIS IV](https://waterservices.usgs.gov/docs/instantaneous-values/instantaneous-values-details/)
-- Daily statistics: [NWIS Statistics](https://waterservices.usgs.gov/docs/statistics/statistics-details/)
+I can spin up the same tool for any river or location with USGS data.
 
-Data courtesy of the U.S. Geological Survey.
+If you want one for your area:
+
+- Send me a request
+- Open an issue
+- Submit a pull request
+
+Just include:
+
+- River or location name
+- (If you know it) the USGS station ID
+
+I’ll build it or help you get it running.
+
+👉 This is meant to spread. If your river matters, you should have one.
+
+## Who this is for
+
+- Fishermen
+- Boaters
+- Riverfront property owners
+- Anyone who watches the water
+
+## Project philosophy
+
+- Fast over fancy
+- Clear over complex
+- No friction
