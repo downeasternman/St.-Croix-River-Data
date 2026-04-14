@@ -47,6 +47,15 @@ Then publish the `dist/` output (for example with the `peaceiris/actions-gh-page
 
 After deploying over HTTPS, open the site in Chrome, use the menu, and choose **Add to Home screen** or **Install app**.
 
+## Commit message policy
+
+This repository uses a local `.git/hooks/commit-msg` hook that rejects commit messages containing `Cursor`/`Made-with: Cursor`.
+
+If a commit is blocked:
+
+1. Edit the commit message to remove the banned trailer/content.
+2. Re-run the commit.
+
 ## Data sources
 
 - Instantaneous values: [NWIS IV](https://waterservices.usgs.gov/docs/instantaneous-values/instantaneous-values-details/)
