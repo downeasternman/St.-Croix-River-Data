@@ -92,6 +92,7 @@ let chartT: Chart<"line"> | null = null;
 let minRefreshMinutes = 15;
 let nextAllowedRefreshAt = 0;
 let refreshTicker: number | null = null;
+let queuedRefreshTimer: number | null = null;
 
 const el = {
   rangeSummary: document.getElementById("rangeSummary")!,
@@ -117,8 +118,8 @@ function setBusy(busy: boolean) {
   el.loadT.hidden = !busy;
   el.chartQ.style.opacity = busy ? "0.25" : "1";
   el.chartT.style.opacity = busy ? "0.25" : "1";
-  if (busy) el.refreshBtn.disabled = true;
-  else updateRefreshUi();
+  el.refreshBtn.classList.toggle("is-busy", busy);
+  updateRefreshUi();
 }
 
 function destroyCharts() {
@@ -189,13 +190,11 @@ function inferMinRefreshMinutes(
 function updateRefreshUi(nowMs = Date.now()): void {
   const waitMs = Math.max(0, nextAllowedRefreshAt - nowMs);
   const waitMin = Math.ceil(waitMs / 60000);
-  const canRefresh = waitMs <= 0;
-  el.refreshBtn.disabled = !canRefresh;
-  if (canRefresh) {
+  if (waitMs <= 0) {
     el.refreshInfo.textContent = `Ready. Minimum interval: ${minRefreshMinutes} min (USGS stations typically update about every 15 min).`;
     return;
   }
-  el.refreshInfo.textContent = `To be gentle on USGS servers, refresh is limited to about every ${minRefreshMinutes} min. Try again in ${waitMin} min.`;
+  el.refreshInfo.textContent = `Refresh available in ${waitMin} min (minimum interval: ${minRefreshMinutes} min).`;
 }
 
 function setRefreshCooldown(): void {
@@ -203,6 +202,17 @@ function setRefreshCooldown(): void {
   updateRefreshUi();
   if (refreshTicker) window.clearInterval(refreshTicker);
   refreshTicker = window.setInterval(() => updateRefreshUi(), 30_000);
+}
+
+function queueRefresh(waitMs: number): void {
+  if (queuedRefreshTimer) window.clearTimeout(queuedRefreshTimer);
+  const waitMin = Math.max(1, Math.ceil(waitMs / 60000));
+  el.refreshInfo.textContent = `Refresh queued for about ${waitMin} min.`;
+  el.refreshBtn.classList.add("is-busy");
+  queuedRefreshTimer = window.setTimeout(() => {
+    queuedRefreshTimer = null;
+    void load();
+  }, waitMs);
 }
 
 async function load() {
@@ -318,8 +328,9 @@ document.getElementById("applyCustom")?.addEventListener("click", () => {
 });
 
 el.refreshBtn.addEventListener("click", () => {
-  if (Date.now() < nextAllowedRefreshAt) {
-    updateRefreshUi();
+  const waitMs = nextAllowedRefreshAt - Date.now();
+  if (waitMs > 0) {
+    queueRefresh(waitMs);
     return;
   }
   void load();

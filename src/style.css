@@ -172,11 +172,35 @@ body {
   cursor: pointer;
   background: #fff;
   color: #1e293b;
+  position: relative;
 }
 
 .btn-refresh:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.btn-refresh.is-busy {
+  color: #334155;
+}
+
+.btn-refresh.is-busy::after {
+  content: "";
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-left: 0.45rem;
+  border: 2px solid #93c5fd;
+  border-top-color: #1d4ed8;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: -0.12rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .refresh-info {
