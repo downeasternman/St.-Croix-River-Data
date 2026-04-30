@@ -31,6 +31,17 @@ app.innerHTML = `
     <p class="tagline">USGS river flow & water temperature</p>
   </header>
 
+  <section class="snapshot" aria-label="Current river conditions">
+    <article class="snapshot-card">
+      <p class="snapshot-label">Current temp</p>
+      <p class="snapshot-value" id="currentTempF">--.- °F</p>
+    </article>
+    <article class="snapshot-card">
+      <p class="snapshot-label">Current flow</p>
+      <p class="snapshot-value" id="currentFlowGps">--.- gal/s</p>
+    </article>
+  </section>
+
   <section class="controls" aria-label="Time range">
     <div class="presets">
       <span class="label">Range</span>
@@ -111,6 +122,8 @@ const el = {
   endDate: document.getElementById("endDate") as HTMLInputElement,
   refreshBtn: document.getElementById("refreshBtn") as HTMLButtonElement,
   refreshInfo: document.getElementById("refreshInfo")!,
+  currentTempF: document.getElementById("currentTempF")!,
+  currentFlowGps: document.getElementById("currentFlowGps")!,
 };
 
 function setBusy(busy: boolean) {
@@ -223,6 +236,8 @@ async function load() {
 
   el.metaQ.textContent = `Site ${SITE_DISCHARGE} · ${el.rangeSummary.textContent}`;
   el.metaT.textContent = `Site ${SITE_TEMP} · ${el.rangeSummary.textContent}`;
+  el.currentTempF.textContent = "--.- °F";
+  el.currentFlowGps.textContent = "--.- gal/s";
   el.footQ.textContent = "";
   el.footT.textContent = "";
   el.histNoteQ.hidden = true;
@@ -274,6 +289,8 @@ async function load() {
     if (ptsQ.length === 0) {
       el.footQ.textContent = "No flow data in this window (maintenance or outages).";
     } else {
+      const currentFlowGps = ptsQ[ptsQ.length - 1].value * GAL_PER_CUBIC_FOOT;
+      el.currentFlowGps.textContent = `${currentFlowGps.toFixed(1)} gal/s`;
       const last = parsedQ.lastQualifierCodes?.length
         ? ` · Codes: ${parsedQ.lastQualifierCodes.join(", ")}`
         : "";
@@ -285,6 +302,8 @@ async function load() {
     if (ptsT.length === 0) {
       el.footT.textContent = "No temperature data in this window.";
     } else {
+      const currentTempF = ptsT[ptsT.length - 1].value;
+      el.currentTempF.textContent = `${currentTempF.toFixed(1)} °F`;
       const last = parsedT.lastQualifierCodes?.length
         ? ` · Codes: ${parsedT.lastQualifierCodes.join(", ")}`
         : "";
