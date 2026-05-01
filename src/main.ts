@@ -94,6 +94,7 @@ app.innerHTML = `
 
   <footer class="app-footer">
     <p>Data: U.S. Geological Survey. IV: recent measurements; statistics: long-term daily means by calendar date where available.</p>
+    <p class="app-footer-sponsor"><a href="https://github.com/sponsors/downeasternman" class="sponsor-link" target="_blank" rel="noreferrer">Sponsor</a></p>
   </footer>
 `;
 
